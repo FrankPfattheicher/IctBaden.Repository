@@ -32,7 +32,9 @@ internal class FileRepositoryBase<TItem> : IItemRepository<TItem>
         }
     }
 
-    private string GetFileTimeStamp(DateTime timestamp)
+#region Timstamp file names
+
+    private string GetFileTimestamp(DateTime timestamp)
     {
         return $"{timestamp.Year:0000}-{timestamp.Month:00}-{timestamp.Day:00}T{timestamp.Hour:00}{timestamp.Minute:00}{timestamp.Second:00}.{timestamp.Millisecond:000}Z";
     }
@@ -44,14 +46,13 @@ internal class FileRepositoryBase<TItem> : IItemRepository<TItem>
                string.Compare(fileName, toDate, StringComparison.InvariantCultureIgnoreCase) <= 0;
     }
 
-
     private string[] GetFileNamesRange(DateTime from, DateTime to, uint maxCount, bool recent)
     {
         if (from.Year < 2000) from = new DateTime(2000, 1, 1, 0,0,0,DateTimeKind.Utc);
         if(to.Year < 2000) to = new DateTime(2000, 1, 1, 0,0,0,DateTimeKind.Utc);
 
-        var fromDate = GetFileTimeStamp(from);
-        var toDate = GetFileTimeStamp(to);
+        var fromDate = GetFileTimestamp(from);
+        var toDate = GetFileTimestamp(to);
         
         if (maxCount > int.MaxValue) maxCount = int.MaxValue;
             
@@ -69,7 +70,7 @@ internal class FileRepositoryBase<TItem> : IItemRepository<TItem>
         return itemFiles.ToArray();
     }
 
-    protected TItem[] GetRecentFileRange(DateTime from, DateTime to, uint maxCount) =>
+    private TItem[] GetRecentFileRange(DateTime from, DateTime to, uint maxCount) =>
         GetFileRange(from, to, maxCount, true);
 
     private TItem[] GetFileRange(DateTime from, DateTime to, uint maxCount, bool recent = false)
@@ -92,6 +93,11 @@ internal class FileRepositoryBase<TItem> : IItemRepository<TItem>
         return items.ToArray();
     }
         
+#endregion
+
+    private string GetItemFileName(string itemId) => Path.Combine(_repoPath, $"{itemId}.json");
+
+
     public TItem[] GetAll()
     {
         var itemFiles = Directory.EnumerateFiles(_repoPath, "*.json");
@@ -112,8 +118,6 @@ internal class FileRepositoryBase<TItem> : IItemRepository<TItem>
 
         return items.ToArray();
     }
-
-    private string GetItemFileName(string itemId) => Path.Combine(_repoPath, $"{itemId}.json");
 
     public TItem GetById(string itemId)
     {
@@ -147,4 +151,6 @@ internal class FileRepositoryBase<TItem> : IItemRepository<TItem>
             File.Delete(fileName);
         }
     }
+    
+    
 }

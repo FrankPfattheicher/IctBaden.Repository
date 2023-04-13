@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace IctBaden.Repository;
 
@@ -18,11 +19,30 @@ public class FileRepository
         }
     }
 
+    /// <summary>
+    /// Create item repository with default name
+    /// i.e. item type name 
+    /// </summary>
+    /// <typeparam name="TItem"></typeparam>
+    /// <returns></returns>
     public IItemRepository<TItem> CreateItemRepository<TItem>() where TItem : new()
     {
         var itemType = typeof(TItem);
-        var itemRepoPath = Path.Combine(_repoPath, itemType.Name);
+        return CreateItemRepository<TItem>(itemType.Name);
+    }
+    
+    /// <summary>
+    /// Create item repository with given name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <typeparam name="TItem"></typeparam>
+    /// <returns></returns>
+    public IItemRepository<TItem> CreateItemRepository<TItem>(string name) where TItem : new()
+    {
+        var itemRepoPath = Path.Combine(_repoPath, name);
         return new FileRepositoryBase<TItem>(_logger, itemRepoPath);
     }
+    
+    
     
 }
